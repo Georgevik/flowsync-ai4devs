@@ -38,6 +38,14 @@ install:
 	@command -v npm  >/dev/null 2>&1 || { echo "❌ npm no está instalado."; exit 1; }
 	@echo "📦 Instalando dependencias del backend..."
 	@cd $(BACKEND) && npm install
+	@# npm >= 12 bloquea los install scripts salvo los listados en `allowScripts`
+	@# (backend/package.json). Un node_modules instalado antes de aprobarlos se
+	@# queda sin el binding nativo de better-sqlite3 y `npm install` no lo
+	@# recompila: lo forzamos si no carga.
+	@cd $(BACKEND) && node -e "new (require('better-sqlite3'))(':memory:')" 2>/dev/null || { \
+		echo "🔧 Compilando el binding nativo de better-sqlite3..."; \
+		npm rebuild better-sqlite3; \
+	}
 	@echo "📦 Instalando dependencias del frontend..."
 	@cd $(FRONTEND) && npm install
 
