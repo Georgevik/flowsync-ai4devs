@@ -44,7 +44,12 @@ install:
 	@# recompila: lo forzamos si no carga.
 	@cd $(BACKEND) && node -e "new (require('better-sqlite3'))(':memory:')" 2>/dev/null || { \
 		echo "🔧 Compilando el binding nativo de better-sqlite3..."; \
-		npm rebuild better-sqlite3; \
+		npm rebuild better-sqlite3 && \
+		node -e "new (require('better-sqlite3'))(':memory:')" || { \
+			echo "❌ better-sqlite3 no carga. Si no hay binario precompilado para tu"; \
+			echo "   Node, node-gyp necesita python3, make y un compilador de C++."; \
+			exit 1; \
+		}; \
 	}
 	@echo "📦 Instalando dependencias del frontend..."
 	@cd $(FRONTEND) && npm install
